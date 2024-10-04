@@ -1,0 +1,20 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*.so
+*.egg
+*.egg-info
+dist/
+build/
+
+# Docker volumes
+postgres_data/
+
+# IDE specific files
+.vscode/
+.idea/
+
+# Python virtual environment
+env/
+venv/
+
