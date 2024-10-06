@@ -1,0 +1,2 @@
+streamlit
+requests  # To make HTTP requests to FastAPI
