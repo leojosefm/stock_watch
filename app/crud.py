@@ -14,7 +14,7 @@ def get_user_by_email(db: Session, email: str):
     return db.query(models.User).filter(models.User.email == email).first()
 
 # Add company to watchlist
-def add_to_watchlist(db: Session, user_id: int, company_id: int):
+def add_to_watchlist(db: Session, user_id: int, company_id: int, rsi_threshold: int):
     db_watchlist = models.Watchlist(user_id=user_id, company_id=company_id)
     db.add(db_watchlist)
     db.commit()

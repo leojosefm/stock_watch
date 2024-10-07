@@ -34,6 +34,8 @@ class Watchlist(BaseModel):
     id: int
     user_id: int
     company_id: int
+    rsi_threshold: int
+
 
     class Config:
         orm_mode = True
