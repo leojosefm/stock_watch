@@ -26,16 +26,17 @@ class Company(CompanyBase):
     class Config:
         orm_mode = True
 
-class WatchlistCreate(BaseModel):
-    user_id: int
-    company_id: int
-
-class Watchlist(BaseModel):
-    id: int
+class WatchlistBase(BaseModel):
     user_id: int
     company_id: int
     rsi_threshold: int
 
+class WatchlistCreate(WatchlistBase):
+    pass
+
+class Watchlist(WatchlistBase):
+    id: int
 
     class Config:
         orm_mode = True
+

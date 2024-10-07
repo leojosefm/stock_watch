@@ -7,15 +7,15 @@ class User(Base):
     __tablename__ = 'users'
 
     id = Column(Integer, primary_key=True, index=True)
-    username = Column(String, unique=True, index=True)
-    email = Column(String, unique=True, index=True)
+    username = Column(String, unique=True, index=False)
+    email = Column(String, unique=True, index=False)
 
 class Company(Base):
     __tablename__ = 'companies'
 
-    id = Column(Integer, primary_key=True, index=True)
-    name = Column(String, index=True)
-    ticker_symbol = Column(String, unique=True, index=True)
+    id = Column(Integer, primary_key=True, index=False)
+    name = Column(String, index=False)
+    ticker_symbol = Column(String, unique=True, index=False)
 
 class Watchlist(Base):
     __tablename__ = 'watchlists'
