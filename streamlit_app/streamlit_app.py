@@ -33,13 +33,25 @@ if st.button("Sign in with Gmail"):
     #     callback_url="http://localhost:8501/"
     # )
 
-    # Check if the user is authenticated
-    if 'token' in st.session_state:
-        token = st.session_state.token
+# Check if the token is in the URL
+    if 'token' in st.experimental_get_query_params():
+        token = st.experimental_get_query_params()['token'][0]
         user_info = verify_token(token)
 
         if user_info:
             st.success(f"Welcome, {user_info['name']}!")
-            # You can add logic to check if the user exists in your database
+            # Logic to check if the user exists in your database
         else:
             st.error("Invalid token, please try again.")
+
+
+    # # Check if the user is authenticated
+    # if 'token' in st.session_state:
+    #     token = st.session_state.token
+    #     user_info = verify_token(token)
+
+    #     if user_info:
+    #         st.success(f"Welcome, {user_info['name']}!")
+    #         # You can add logic to check if the user exists in your database
+    #     else:
+    #         st.error("Invalid token, please try again.")
