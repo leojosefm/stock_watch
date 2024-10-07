@@ -1,2 +1,6 @@
 streamlit
+streamlit-authenticator
 requests  # To make HTTP requests to FastAPI
+google-auth 
+google-auth-oauthlib 
+google-auth-httplib2

@@ -28,5 +28,16 @@ services:
     depends_on:
       - db
 
+  streamlit:
+    build:
+      context: .
+      dockerfile: Dockerfile.streamlit
+    volumes:
+      - ./streamlit_app:/app/streamlit_app
+    ports:
+      - "8501:8501"
+    depends_on:
+      - db
+
 volumes:
   postgres_data:

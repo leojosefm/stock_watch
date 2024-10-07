@@ -5,7 +5,7 @@ FROM python:3.9-slim
 WORKDIR /app
 
 # Copy the Streamlit app into the container
-COPY . /app
+COPY /streamlit_app/streamlit_app.py requirements_streamlit.txt /app/
 
 # Install dependencies for Streamlit
 RUN pip install --no-cache-dir -r requirements_streamlit.txt
@@ -14,4 +14,4 @@ RUN pip install --no-cache-dir -r requirements_streamlit.txt
 EXPOSE 8501
 
 # Run the Streamlit app
-CMD ["streamlit", "run", "app.py", "--server.port=8501", "--server.address=0.0.0.0"]
+CMD ["streamlit", "run", "streamlit_app.py", "--server.port=8501", "--server.address=0.0.0.0"]
