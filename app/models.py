@@ -9,7 +9,7 @@ class User(Base):
     id = Column(Integer, primary_key=True, index=True)
     username = Column(String, unique=True, index=False)
     email = Column(String, unique=True, index=False)
-    name =  Column(String, unique=True, index=False)
+    name = Column(String)
 
 class Company(Base):
     __tablename__ = 'companies'
