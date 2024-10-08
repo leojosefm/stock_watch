@@ -8,7 +8,7 @@ import random
 import string
 import requests 
 import json
-from pages import watchlist
+
 
 
 # API URL for creating a user
@@ -90,8 +90,8 @@ def show_login_page():
 def show_main_page():
     st.title("Welcome to Your Watchlist")
     # Display user info
-    st.write(f"Hello, **{st.session_state['user_name']}**!")
-    st.write(f"Email: {st.session_state['user_email']}")
+    st.write(f"Hello, **{st.session_state['user_email']}**!")
+
 
     st.markdown("---")
 
@@ -118,8 +118,8 @@ def main():
         show_login_page()  # Show the login page if not logged in
 
     # Create a login button
-    if not st.session_state['logged_in']:
-        st.markdown(f'<a href="https://accounts.google.com/o/oauth2/v2/auth?client_id={CLIENT_ID}&redirect_uri=http://localhost:8501/&response_type=id_token&scope=email profile&nonce={st.session_state.nonce}" target="_self">Sign in with Gmail</a>', unsafe_allow_html=True)
+    # if not st.session_state['logged_in']:
+    #     st.markdown(f'<a href="https://accounts.google.com/o/oauth2/v2/auth?client_id={CLIENT_ID}&redirect_uri=http://localhost:8501/&response_type=id_token&scope=email profile&nonce={st.session_state.nonce}" target="_self">Sign in with Gmail</a>', unsafe_allow_html=True)
 
 
 
