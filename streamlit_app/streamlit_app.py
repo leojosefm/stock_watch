@@ -16,42 +16,31 @@ def verify_token(token):
         return None
 
 # Create a simple Streamlit app with authentication
-st.title("Gmail Login with Streamlit")
+st.title("Login using Gmail")
 
 # Create a login button
-if st.button("Sign in with Gmail"):
-    st.markdown(f'<a href="https://accounts.google.com/o/oauth2/v2/auth?client_id={CLIENT_ID}&redirect_uri=http://localhost:8501/&response_type=token&scope=email profile" target="_self">Sign in with Gmail</a>', unsafe_allow_html=True)
-    
-    # Redirect to Google sign-in
-    # stauth.Authenticate(
-    #     cookie_name="cookie_name",
-    #     key="some_random_key",
-    #     password="password",
-    #     username="username",
-    #     google_client_id=CLIENT_ID,
-    #     google_client_secret=CLIENT_SECRET,
-    #     callback_url="http://localhost:8501/"
-    # )
+
+st.markdown(f'<a href="https://accounts.google.com/o/oauth2/v2/auth?client_id={CLIENT_ID}&redirect_uri=http://localhost:8501/&response_type=token&scope=email profile" target="_self">Sign in with Gmail</a>', unsafe_allow_html=True)
+
+# Redirect to Google sign-in
+# stauth.Authenticate(
+#     cookie_name="cookie_name",
+#     key="some_random_key",
+#     password="password",
+#     username="username",
+#     google_client_id=CLIENT_ID,
+#     google_client_secret=CLIENT_SECRET,
+#     callback_url="http://localhost:8501/"
+# )
 
 # Check if the token is in the URL
-    if 'token' in st.experimental_get_query_params():
-        token = st.experimental_get_query_params()['token'][0]
-        user_info = verify_token(token)
+# Check if the token is in the URL
+if 'token' in st.query_params:
+    token = st.query_params['token'][0]
+    user_info = verify_token(token)
 
-        if user_info:
-            st.success(f"Welcome, {user_info['name']}!")
-            # Logic to check if the user exists in your database
-        else:
-            st.error("Invalid token, please try again.")
-
-
-    # # Check if the user is authenticated
-    # if 'token' in st.session_state:
-    #     token = st.session_state.token
-    #     user_info = verify_token(token)
-
-    #     if user_info:
-    #         st.success(f"Welcome, {user_info['name']}!")
-    #         # You can add logic to check if the user exists in your database
-    #     else:
-    #         st.error("Invalid token, please try again.")
+    if user_info:
+        st.success(f"Welcome, {user_info['name']}!")
+        # Logic to check if the user exists in your database
+    else:
+        st.error("Invalid token, please try again.")
