@@ -100,7 +100,7 @@ def show_main_page():
 
     # Logout button
     if st.button("Logout"):
-        st.session_state['logged_in'] = False
+        st.session_state.clear()  # Clear the session state on logout
         st.rerun()
 
 def main():
