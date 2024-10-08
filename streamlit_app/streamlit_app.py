@@ -3,9 +3,31 @@ import streamlit_authenticator as stauth
 from google.oauth2 import id_token
 from google.auth.transport import requests
 
+
+# API URL for creating a user
+API_URL = "http://localhost:8000/users/"
+
 # Configure Google OAuth 2.0
 CLIENT_ID = '1012644879713-sj9mtjginh6oqmcm3a2ju3vv5fah94cl.apps.googleusercontent.com'
 CLIENT_SECRET = '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'
+
+
+# Function to call FastAPI to create a user
+def create_user(email: str):
+    try:
+        response = requests.post(
+            API_URL,
+            json={"email": email}  # Adjust this to include other fields if needed
+        )
+        if response.status_code == 201:
+            st.success("User created successfully!")
+        elif response.status_code == 409:  # Conflict (duplicate entry)
+            st.info("User already exists.")
+        else:
+            st.error("Error creating user: " + response.text)
+    except Exception as e:
+        st.error(f"Failed to create user: {e}")
+
 
 # Create a function to verify the token received from Google
 def verify_token(token):
