@@ -36,6 +36,18 @@ def create_user(email: str):
         st.write("User created successfully")
 
 
+def get_user_id(email: str):
+    payload = json.dumps({
+            "email": email
+            })
+    
+    headers = {
+    'Content-Type': 'application/json'
+    }
+    print (payload)
+
+    response = requests.request("GET", API_URL_BASE+f"users/{st.session_state['user_email']}/id", headers=headers, data=payload)
+    return response.json()
 
 # Function to generate a random nonce
 def generate_nonce(length=16):
@@ -91,17 +103,30 @@ def show_main_page():
     st.title("Welcome to Your Watchlist")
     # Display user info
     st.write(f"Hello, **{st.session_state['user_email']}**!")
-
+    
 
     st.markdown("---")
 
     # You can add more content here (e.g., user-specific data, features, etc.)
-    st.write("Here’s your personalized content.")
+    # Call the FastAPI endpoint to get user ID by email
+    #response = requests.get(f"{API_URL_BASE}users/{st.session_state['user_email']}/id")
 
-    # Logout button
-    if st.button("Logout"):
-        st.session_state.clear()  # Clear the session state on logout
-        st.rerun()
+    print(get_user_id(st.session_state['user_email']))
+
+    # # Logout button
+    # if st.button("Logout"):
+    #     st.session_state.clear()  # Clear the session state on logout
+    #     st.session_state['logged_in'] = False
+    st.write(f'''
+<a target="_self" href="http://localhost:8501">
+    <button>
+        Log out
+    </button>
+</a>
+''',
+unsafe_allow_html=True
+)
+        
 
 def main():
     # Create a simple Streamlit app with authentication

@@ -4,6 +4,7 @@ from . import models, schemas
 # Create a new user
 def create_user(db: Session, user: schemas.UserCreate):
     db_user = models.User(email=user.email)
+    logging.info(db_user)
     db.add(db_user)
     db.commit()
     db.refresh(db_user)
@@ -12,6 +13,11 @@ def create_user(db: Session, user: schemas.UserCreate):
 # Get a user by email
 def get_user_by_email(db: Session, email: str):
     return db.query(models.User).filter(models.User.email == email).first()
+
+# Function to retrieve a watchlist by user ID
+def get_watchlist_by_user_id(db: Session, user_id: int):
+    return db.query(models.Watchlist).filter(models.Watchlist.user_id == user_id).all()
+
 
 # Add company to watchlist
 def add_to_watchlist(db: Session, watchlist: schemas.WatchlistCreate):
