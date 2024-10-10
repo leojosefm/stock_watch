@@ -46,8 +46,25 @@ def get_user_id(email: str):
     }
     print (payload)
 
-    response = requests.request("GET", API_URL_BASE+f"users/{st.session_state['user_email']}/id", headers=headers, data=payload)
+    response = requests.request("GET", API_URL_BASE+f"users/{email}/id", headers=headers, data=payload)
     return response.json()
+
+def fetch_watchlist(id: int):
+    payload = json.dumps({
+            "id": id
+            })
+    
+    headers = {
+    'Content-Type': 'application/json'
+    }
+    print (payload)
+
+    response = requests.request("GET", API_URL_BASE+f"users/watchlist/{id}", headers=headers, data=payload)
+    return response.json()
+
+
+
+
 
 # Function to generate a random nonce
 def generate_nonce(length=16):
@@ -111,7 +128,7 @@ def show_main_page():
     # Call the FastAPI endpoint to get user ID by email
     #response = requests.get(f"{API_URL_BASE}users/{st.session_state['user_email']}/id")
 
-    print(get_user_id(st.session_state['user_email']))
+    
 
     # # Logout button
     # if st.button("Logout"):
@@ -126,7 +143,26 @@ def show_main_page():
 ''',
 unsafe_allow_html=True
 )
-        
+    
+    st.subheader("Current Watchlist")
+    watchlist_data = fetch_watchlist(get_user_id(st.session_state['user_email'])['id'])
+
+    if watchlist_data:
+        # Assuming the API returns a list of dictionaries with columns: company_name, ticker_symbol, rsi_threshold
+        df = pd.DataFrame(watchlist_data)
+        st.dataframe(df)
+    else:
+        st.write("Your watchlist is empty.")
+    
+
+    # Add to Watchlist Section
+    st.subheader("Add to Watchlist")
+    with st.form(key='add_watchlist_form'):
+        company_name = st.text_input("Company Name")
+        ticker_symbol = st.text_input("Ticker Symbol")
+        rsi_threshold = st.number_input("RSI Threshold", min_value=0, max_value=100)
+
+        submit_button = st.form_submit_button(label='Submit')
 
 def main():
     # Create a simple Streamlit app with authentication
