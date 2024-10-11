@@ -15,3 +15,6 @@ EXPOSE 8000
 
 # Run the FastAPI app using Uvicorn server
 CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
+
+# Run the refresh script at container start
+CMD ["python", "companies.py"]

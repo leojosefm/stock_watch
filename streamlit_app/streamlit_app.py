@@ -124,22 +124,28 @@ def show_main_page():
 
     st.markdown("---")
 
-    # You can add more content here (e.g., user-specific data, features, etc.)
-    # Call the FastAPI endpoint to get user ID by email
-    #response = requests.get(f"{API_URL_BASE}users/{st.session_state['user_email']}/id")
-
+    # Custom CSS to move the logout button to the top right corner
+    st.markdown(
+        """
+        <style>
+        .top-right-button {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+        }
+        </style>
+        """,
+        unsafe_allow_html=True
+    )
     
-
-    # # Logout button
-    # if st.button("Logout"):
-    #     st.session_state.clear()  # Clear the session state on logout
-    #     st.session_state['logged_in'] = False
     st.write(f'''
+<div class="top-right-button">
 <a target="_self" href="http://localhost:8501">
     <button>
         Log out
     </button>
 </a>
+</div>
 ''',
 unsafe_allow_html=True
 )
