@@ -21,5 +21,6 @@ class Watchlist(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer)
-    company_id = Column(Integer)
+    company_name = Column(String)
+    ticker_symbol = Column(String)
     rsi_threshold = Column(Integer)

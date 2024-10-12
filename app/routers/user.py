@@ -31,6 +31,7 @@ def get_user_id(email:str, db: Session = Depends(get_db)):
         return db_user
     
 
+
 @router.get("/watchlist/{user_id}")
 def get_watchlists(user_id: int, db: Session = Depends(get_db)):
     watchlists = crud.get_watchlist_by_user_id(db, user_id= user_id)

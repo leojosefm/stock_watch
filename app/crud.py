@@ -15,6 +15,12 @@ def create_user(db: Session, user: schemas.UserCreate):
 def get_user_by_email(db: Session, email: str):
     return db.query(models.User).filter(models.User.email == email).first()
 
+# Get a user by email
+def get_companies(db: Session):
+    companies =  db.query(models.Company).all()
+    return [{"company_name": company.name, "ticker_symbol": company.ticker_symbol} for company in companies]
+
+
 # Function to retrieve a watchlist by user ID
 def get_watchlist_by_user_id(db: Session, user_id: int):
     return db.query(models.Watchlist).filter(models.Watchlist.user_id == user_id).all()
@@ -22,7 +28,7 @@ def get_watchlist_by_user_id(db: Session, user_id: int):
 
 # Add company to watchlist
 def add_to_watchlist(db: Session, watchlist: schemas.WatchlistCreate):
-    db_watchlist = models.Watchlist(user_id=watchlist.user_id, company_id=watchlist.company_id)
+    db_watchlist = models.Watchlist(user_id=watchlist.user_id, company_name=watchlist.company_name, ticker_symbol=watchlist.ticker_symbol, rsi_threshold = watchlist.rsi_threshold)
     db.add(db_watchlist)
     db.commit()
     db.refresh(db_watchlist)

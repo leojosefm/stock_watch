@@ -28,7 +28,8 @@ class Company(CompanyBase):
 
 class WatchlistBase(BaseModel):
     user_id: int
-    company_id: int
+    company_name: str
+    ticker_symbol: str
     rsi_threshold: int
 
 class WatchlistCreate(WatchlistBase):
