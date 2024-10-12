@@ -8,7 +8,7 @@ router = APIRouter(
     tags=["companies"]
 )
 
-@router.get("/companies")
+@router.get("/")
 def get_companies(db: Session = Depends(get_db)):
     db_companies = crud.get_companies(db)
     if db_companies:
