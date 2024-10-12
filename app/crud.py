@@ -1,5 +1,6 @@
 from sqlalchemy.orm import Session
 from . import models, schemas
+import logging
 
 # Create a new user
 def create_user(db: Session, user: schemas.UserCreate):

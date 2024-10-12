@@ -4,20 +4,20 @@ from .database import Base
 
 
 class User(Base):
-    __tablename__ = 'users'
+    __tablename__ = 'user'
 
     id = Column(Integer, primary_key=True, index=True)
     email = Column(String, unique=True, index=False)
     
 class Company(Base):
-    __tablename__ = 'companies'
+    __tablename__ = 'company'
 
     id = Column(Integer, primary_key=True, index=False)
     name = Column(String, index=False)
     ticker_symbol = Column(String, unique=True, index=False)
 
 class Watchlist(Base):
-    __tablename__ = 'watchlists'
+    __tablename__ = 'watchlist'
 
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer)
