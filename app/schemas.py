@@ -31,6 +31,8 @@ class WatchlistBase(BaseModel):
     company_name: str
     ticker_symbol: str
     rsi_threshold: int
+    triggered: bool = False
+
 
 class WatchlistCreate(WatchlistBase):
     pass

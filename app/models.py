@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String
+from sqlalchemy import Column, Integer, String, Boolean
 from .database import Base
 
 
@@ -24,3 +24,4 @@ class Watchlist(Base):
     company_name = Column(String)
     ticker_symbol = Column(String)
     rsi_threshold = Column(Integer)
+    triggered = Column(Boolean, default = False)

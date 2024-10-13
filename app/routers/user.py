@@ -18,9 +18,11 @@ def create_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
     else:
         return crud.create_user(db=db, user=user)
 
-@router.post("/watchlist")
-def add_to_watchlist(user_id: int, company_id: int, rsi_threshold: int, db: Session = Depends(get_db)):
-    return crud.add_to_watchlist(db=db, user_id=user_id, company_id=company_id,rsi_threshold=rsi_threshold)
+
+
+@router.post("/watchlist/")
+def add_to_watchlist(watchlist: schemas.WatchlistCreate, db: Session = Depends(get_db)):
+    return crud.add_to_watchlist(db=db, watchlist = watchlist)
 
 
 @router.get("/{email}/id",response_model=schemas.User)
