@@ -1,5 +1,6 @@
-from sqlalchemy import Column, Integer, String, Boolean
+from sqlalchemy import Column, Integer, String, Boolean, DateTime , Date, Numeric, func
 from .database import Base
+from datetime import datetime
 
 
 
@@ -25,3 +26,20 @@ class Watchlist(Base):
     ticker_symbol = Column(String)
     rsi_threshold = Column(Integer)
     triggered = Column(Boolean, default = False)
+    added_datetime  =  Column(DateTime, default=func.now())
+    triggered_datetime = Column(DateTime, default=datetime(9999, 12, 31))
+
+Class Pricehistory(Base):
+    __tablename__ = 'price_history'
+
+    id = Column(Integer, primary_key=True, index=True)
+    date = Column(Date)
+    open = Column(Numeric)
+    high = Column(Numeric)
+    low = Column(Numeric)
+    close = Column(Numeric)
+    adj_close = Column(Numeric)
+    volume = Column(Integer)
+    RSI = Column(Numeric)
+    ticker = Column(String)
+

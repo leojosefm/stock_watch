@@ -43,7 +43,7 @@ def create_user(email: str):
 
 #Function to display triggered & pending alerts
 def display_alerts(type,triggered_flag,watchlist_data):    
-    st.subheader(type)
+    st.subheader(f"{type.capitalize()}")
     alerts = watchlist_data[watchlist_data['triggered'] == triggered_flag]
     
     if not alerts.empty:

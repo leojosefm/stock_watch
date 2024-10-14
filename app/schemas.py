@@ -1,4 +1,6 @@
 from pydantic import BaseModel
+from datetime import datetime,date
+
 
 class UserBase(BaseModel):
     email: str
@@ -32,12 +34,35 @@ class WatchlistBase(BaseModel):
     ticker_symbol: str
     rsi_threshold: int
     triggered: bool = False
+    added_datetime: datetime = datetime.now()
+    triggered_datetime: datetime = datetime(9999, 12, 31)
+
 
 
 class WatchlistCreate(WatchlistBase):
     pass
 
 class Watchlist(WatchlistBase):
+    id: int
+
+    class Config:
+        orm_mode = True
+
+class PricehistoryBase(BaseModel):
+    date: date
+    open: float
+    high: float
+    low: float
+    close: float
+    adj_close: float
+    volume: int
+    ticker: str
+
+
+class PricehistoryBase(PricehistoryBase):
+    pass
+
+class Pricehistory(PricehistoryBase):
     id: int
 
     class Config:
