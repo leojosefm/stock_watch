@@ -48,6 +48,10 @@ def display_alerts(type,triggered_flag,watchlist_data,col_list):
     #['company_name', 'ticker_symbol', 'rsi_threshold']
     if not alerts.empty:
         # Create dataframe for pending alerts
+        alerts = alerts.reset_index(drop=True)
+        alerts.index += 1 
+        alerts['Serial No.'] = alerts.index
+
         df = alerts[col_list]
         df.columns = df.columns.str.replace('_', ' ').str.title()
         st.dataframe(df)
@@ -189,9 +193,9 @@ unsafe_allow_html=True
     col1, col2 = st.columns(2)
 
     with col1:
-        display_alerts("pending alerts",False,watchlist_data, ['company_name', 'ticker_symbol', 'rsi_threshold','added_datetime'])
+        display_alerts("pending alerts",False,watchlist_data, ['Serial No.','company_name', 'ticker_symbol', 'rsi_threshold','added_datetime'])
     with col2:
-        display_alerts("triggered alerts",True,watchlist_data,['company_name', 'ticker_symbol', 'rsi_threshold','triggered_datetime'])
+        display_alerts("triggered alerts",True,watchlist_data,['Serial No.','company_name', 'ticker_symbol', 'rsi_threshold','triggered_datetime'])
 
 
     # Add to Watchlist Section
