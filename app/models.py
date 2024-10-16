@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Boolean, DateTime , Date, Numeric, func
+from sqlalchemy import Column, Integer, String, Boolean, DateTime , Date, Numeric, func, UniqueConstraint  
 from .database import Base
 from datetime import datetime
 
@@ -28,8 +28,13 @@ class Watchlist(Base):
     triggered = Column(Boolean, default = False)
     added_datetime  =  Column(DateTime, default=func.now())
     triggered_datetime = Column(DateTime, default=datetime(9999, 12, 31))
+    rsi_triggered = Column(Numeric)
 
-Class Pricehistory(Base):
+    __table_args__ = (
+        UniqueConstraint('user_id', 'ticker_symbol', 'rsi_threshold', 'triggered', name='_user_ticker_rsi_trigger_uc'),
+    )
+
+class Pricehistory(Base):
     __tablename__ = 'price_history'
 
     id = Column(Integer, primary_key=True, index=True)

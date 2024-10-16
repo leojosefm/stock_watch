@@ -1,6 +1,6 @@
 from pydantic import BaseModel
 from datetime import datetime,date
-
+from typing import Optional
 
 class UserBase(BaseModel):
     email: str
@@ -36,6 +36,7 @@ class WatchlistBase(BaseModel):
     triggered: bool = False
     added_datetime: datetime = datetime.now()
     triggered_datetime: datetime = datetime(9999, 12, 31)
+    rsi_triggered: Optional[float] = None
 
 
 

@@ -1,6 +1,7 @@
 from sqlalchemy.orm import Session
 from . import models, schemas
 import logging
+from sqlalchemy.exc import IntegrityError
 
 # Create a new user
 def create_user(db: Session, user: schemas.UserCreate):
@@ -30,6 +31,10 @@ def get_watchlist_by_user_id(db: Session, user_id: int):
 def add_to_watchlist(db: Session, watchlist: schemas.WatchlistCreate):
     db_watchlist = models.Watchlist( user_id = watchlist.user_id,company_name=watchlist.company_name, ticker_symbol=watchlist.ticker_symbol, rsi_threshold = watchlist.rsi_threshold)
     db.add(db_watchlist)
-    db.commit()
-    db.refresh(db_watchlist)
-    return db_watchlist
+    try:
+        db.commit()
+        db.refresh(db_watchlist)
+        return db_watchlist
+    except IntegrityError:
+        db.rollback()
+        return {"error": "A pending alert already exists for this threshold value for the user"}

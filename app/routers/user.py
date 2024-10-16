@@ -22,7 +22,13 @@ def create_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
 
 @router.post("/watchlist/")
 def add_to_watchlist(watchlist: schemas.WatchlistCreate, db: Session = Depends(get_db)):
-    return crud.add_to_watchlist(db=db, watchlist = watchlist)
+    result =  crud.add_to_watchlist(db=db, watchlist = watchlist)
+    if isinstance(result, models.Watchlist):
+        result = result.__dict__
+    if "error" in result:
+        raise HTTPException(status_code=400, detail=result["error"])
+    
+    return result 
 
 
 @router.get("/{email}/id",response_model=schemas.User)

@@ -42,13 +42,13 @@ def create_user(email: str):
 
 
 #Function to display triggered & pending alerts
-def display_alerts(type,triggered_flag,watchlist_data):    
+def display_alerts(type,triggered_flag,watchlist_data,col_list):    
     st.subheader(f"{type.capitalize()}")
     alerts = watchlist_data[watchlist_data['triggered'] == triggered_flag]
-    
+    #['company_name', 'ticker_symbol', 'rsi_threshold']
     if not alerts.empty:
         # Create dataframe for pending alerts
-        df = alerts[['company_name', 'ticker_symbol', 'rsi_threshold']]
+        df = alerts[col_list]
         df.columns = df.columns.str.replace('_', ' ').str.title()
         st.dataframe(df)
     else:
@@ -189,9 +189,9 @@ unsafe_allow_html=True
     col1, col2 = st.columns(2)
 
     with col1:
-        display_alerts("pending alerts",False,watchlist_data)
+        display_alerts("pending alerts",False,watchlist_data, ['company_name', 'ticker_symbol', 'rsi_threshold','added_datetime'])
     with col2:
-        display_alerts("triggered alerts",True,watchlist_data)
+        display_alerts("triggered alerts",True,watchlist_data,['company_name', 'ticker_symbol', 'rsi_threshold','triggered_datetime'])
 
 
     # Add to Watchlist Section
@@ -231,6 +231,8 @@ unsafe_allow_html=True
 
         if response.status_code == 200:
             st.success(f"Company {company_name}, RSI {rsi_threshold} added to alerts.")
+        elif response.status_code == 400:
+            st.error(response.json().get('detail'))
         else:
             st.error("Error adding to alerts.")
 
