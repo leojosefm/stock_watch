@@ -16,8 +16,8 @@ import pandas as pd
 API_URL_BASE = "http://fastapi_app:8000/"
 
 # Configure Google OAuth 2.0
-CLIENT_ID = '1012644879713-sj9mtjginh6oqmcm3a2ju3vv5fah94cl.apps.googleusercontent.com'
-CLIENT_SECRET = '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'
+CLIENT_ID = <client-id>
+CLIENT_SECRET = <client-secret>
 
 
 
