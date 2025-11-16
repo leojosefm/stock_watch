@@ -10,14 +10,19 @@ import requests
 import json
 import logging
 import pandas as pd
+from dotenv import load_dotenv
+import os
 
 
 # API URL for creating a user
 API_URL_BASE = "http://fastapi_app:8000/"
 
+# Load environment variables
+load_dotenv()
+
 # Configure Google OAuth 2.0
-CLIENT_ID = <client-id>
-CLIENT_SECRET = <client-secret>
+CLIENT_ID = os.getenv('CLIENT_ID')
+CLIENT_SECRET = os.getenv('CLIENT_SECRET')
 
 
 
