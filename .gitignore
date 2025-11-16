@@ -15,6 +15,5 @@ postgres_data/
 .idea/
 
 # Python virtual environment
-env/
-venv/
+.env
 
