@@ -15,7 +15,7 @@ To run this project, you will need:
 - Docker Compose installed on your machine.
 - Python 3.8+ for local development (optional).
 - A GitHub repository for version control (optional).
-
+- A Google Cloud Console -- Project and Client secrets 
 
 ## **Getting Started**
 Follow these steps to set up the project on your local machine:
