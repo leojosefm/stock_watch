@@ -17,6 +17,7 @@ class Company(Base):
     name = Column(String, index=False)
     ticker_symbol = Column(String, unique=True, index=False)
 
+
 class Watchlist(Base):
     __tablename__ = 'watchlist'
 
