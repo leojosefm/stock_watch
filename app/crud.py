@@ -2,6 +2,39 @@ from sqlalchemy.orm import Session
 from . import models, schemas
 import logging
 from sqlalchemy.exc import IntegrityError
+import yfinance as yf
+
+
+def get_pegy_ratio(ticker_symbol: str):
+    try:
+        stock = yf.Ticker(ticker_symbol)
+        info = stock.info
+        pe_ratio = info.get('trailingPE')
+        growth_rate = info.get('earningsGrowth')
+        dividend_yield = info.get('dividendYield', 0)
+        if not pe_ratio or not growth_rate:
+            return None
+        pegy = pe_ratio / ((growth_rate * 100) + ((dividend_yield or 0) * 100))
+        return round(pegy, 2)
+    except Exception as e:
+        logging.error(f"Error fetching PEGY for {ticker_symbol}: {e}")
+        return None
+    
+def update_pegy_ratio(db: Session, watchlist_id: int, ticker_symbol: str):
+    pegy = get_pegy_ratio(ticker_symbol)
+    if pegy is not None:
+        db.query(models.Watchlist).filter(
+            models.Watchlist.id == watchlist_id
+        ).update({"pegy_ratio": pegy})
+        db.commit()
+    return pegy
+
+def refresh_pegy_for_user(db: Session, user_id: int):
+    watchlists = get_watchlist_by_user_id(db, user_id)
+    for item in watchlists:
+        if item.pegy_ratio is None:           # fetch if empty
+            update_pegy_ratio(db, item.id, item.ticker_symbol)
+    return get_watchlist_by_user_id(db, user_id)
 
 # Create a new user
 def create_user(db: Session, user: schemas.UserCreate):
@@ -38,3 +71,10 @@ def add_to_watchlist(db: Session, watchlist: schemas.WatchlistCreate):
     except IntegrityError:
         db.rollback()
         return {"error": "A pending alert already exists for this threshold value for the user"}
+    
+def create_company(db: Session, company_name: str, ticker_symbol: str):
+    company = models.Company(name=company_name, ticker_symbol=ticker_symbol)
+    db.add(company)
+    db.commit()
+    db.refresh(company)
+    return company

@@ -37,7 +37,7 @@ class WatchlistBase(BaseModel):
     added_datetime: datetime = datetime.now()
     triggered_datetime: datetime = datetime(9999, 12, 31)
     rsi_triggered: Optional[float] = None
-
+    pegy_ratio: Optional[float] = None
 
 
 class WatchlistCreate(WatchlistBase):

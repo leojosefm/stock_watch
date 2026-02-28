@@ -56,3 +56,8 @@ stock_watch/
 ├── docker-compose.yml          # Docker Compose configuration
 ├── requirements.txt            # Python dependencies
 └── README.md                   # Project documentation
+
+## Alembic migration steps after making DB modifictionans
+```docker exec -it fastapi_app alembic revision --autogenerate -m "<comment>"
+docker exec -it fastapi_app alembic upgrade head
+```

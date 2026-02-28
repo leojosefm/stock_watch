@@ -12,6 +12,7 @@ import logging
 import pandas as pd
 from dotenv import load_dotenv
 import os
+# import yfinance as yf
 
 
 # API URL for creating a user
@@ -23,8 +24,6 @@ load_dotenv()
 # Configure Google OAuth 2.0
 CLIENT_ID = os.getenv('CLIENT_ID')
 CLIENT_SECRET = os.getenv('CLIENT_SECRET')
-
-
 
 
     
@@ -49,8 +48,19 @@ def create_user(email: str):
 #Function to display triggered & pending alerts
 def display_alerts(type,triggered_flag,watchlist_data,col_list):    
     st.subheader(f"{type.capitalize()}")
-    alerts = watchlist_data[watchlist_data['triggered'] == triggered_flag]
+    #alerts = watchlist_data[watchlist_data['triggered'] == triggered_flag]
     #['company_name', 'ticker_symbol', 'rsi_threshold']
+    # Guard: check if dataframe is empty or column missing
+    if watchlist_data.empty:
+        st.write(f"No {type}")
+        return
+    
+    if 'triggered' not in watchlist_data.columns:
+        st.error(f"Unexpected data format: {watchlist_data.columns.tolist()}")
+        return
+    
+
+    alerts = watchlist_data
     if not alerts.empty:
         # Create dataframe for pending alerts
         alerts = alerts.reset_index(drop=True)
@@ -86,18 +96,31 @@ def fetch_watchlist(id: int):
     }
     print (payload)
 
-    response = requests.request("GET", API_URL_BASE+f"users/watchlist/{id}", headers=headers, data=payload)
-    return response.json()
+    try:
+        response = requests.request(
+            "GET", 
+            API_URL_BASE+f"users/watchlist/{id}",
+            timeout=5
+        )
+        if response.status_code == 200 and response.text:
+            return response.json()
+        return []       # 👈 return empty list if no content
+    except Exception as e:
+        st.error(f"Error fetching watchlist: {e}")
+        return []
 
 # Function to fetch companies
 def fetch_companies():
-    response = requests.get(f"{API_URL_BASE}companies/")
-    if response.status_code == 200:
-        return response.json()
-    else:
-        st.error("Failed to fetch companies.")
-        return []
-
+    try:
+        response = requests.get(f"{API_URL_BASE}companies/")
+        if response.status_code == 200:
+            return response.json()
+        else:
+            st.error("Failed to fetch companies.")
+            return []
+    except Exception as e:
+        st.error(f"Error connecting to API: {e}")
+        return []       
 
 
 # Function to generate a random nonce
@@ -118,6 +141,29 @@ def verify_token(token):
         return idinfo
     except ValueError:
         return None
+    
+# def get_pegy_ratio(ticker_symbol: str):
+#     try:
+#         stock = yf.Ticker(ticker_symbol)
+#         info = stock.info
+
+#         pe_ratio = info.get('trailingPE')
+#         growth_rate = info.get('earningsGrowth')       # as decimal e.g. 0.15 = 15%
+#         dividend_yield = info.get('dividendYield', 0)  # as decimal e.g. 0.02 = 2%
+
+#         if not pe_ratio or not growth_rate:
+#             return None
+
+#         # Convert decimals to percentages
+#         growth_rate_pct = growth_rate * 100
+#         dividend_yield_pct = (dividend_yield or 0) * 100
+
+#         pegy = pe_ratio / (growth_rate_pct + dividend_yield_pct)
+#         return round(pegy, 2)
+
+#     except Exception as e:
+#         print(f"Error fetching PEGY for {ticker_symbol}: {e}")
+#         return None
 
 # Function to display the login page
 def show_login_page():
@@ -157,13 +203,10 @@ def show_main_page():
     st.set_page_config(page_title="Stock Monitor - Dashboard", layout="wide")
     st.title("📊 Stock Monitor")
     st.markdown("### Welcome to Your Watchlist")
-    # Display user info
     st.write(f"Hello, **{st.session_state['user_email']}**!")
-    
 
     st.markdown("---")
 
-    # Custom CSS to move the logout button to the top right corner
     st.markdown(
         """
         <style>
@@ -180,71 +223,108 @@ def show_main_page():
     st.write(f'''
 <div class="top-right-button">
 <a target="_self" href="http://localhost:8501">
-    <button>
-        Log out
-    </button>
+    <button>Log out</button>
 </a>
 </div>
-''',
-unsafe_allow_html=True
-)
+''', unsafe_allow_html=True)
     
     watchlist_data = fetch_watchlist(get_user_id(st.session_state['user_email'])['id'])
 
-    # Ensure watchlist_data is a DataFrame
-    if isinstance(watchlist_data, list):
+    if not watchlist_data:
+        watchlist_data = pd.DataFrame()
+    elif isinstance(watchlist_data, list):
         watchlist_data = pd.DataFrame(watchlist_data)
-    # Create two columns to display alert
+
     col1, col2 = st.columns(2)
-
     with col1:
-        display_alerts("pending alerts",False,watchlist_data, ['Serial No.','company_name', 'ticker_symbol', 'rsi_threshold','added_datetime'])
+        display_alerts("pending alerts", False, watchlist_data, ['Serial No.','company_name', 'ticker_symbol', 'rsi_threshold','added_datetime'])
     with col2:
-        display_alerts("triggered alerts",True,watchlist_data,['Serial No.','company_name', 'ticker_symbol', 'rsi_threshold','triggered_datetime'])
+        display_alerts("triggered alerts", True, watchlist_data, ['Serial No.','company_name', 'ticker_symbol', 'rsi_threshold','triggered_datetime'])
 
+    st.markdown("---")
 
-    # Add to Watchlist Section
+    # ✅ Add New Company Section
+    st.subheader("Add New Company")
+    col1, col2, col3 = st.columns([2, 1, 1])
+    with col1:
+        new_company_name = st.text_input("Company Name")
+    with col2:
+        new_ticker = st.text_input("Ticker Symbol")
+    with col3:
+        st.write("")
+        st.write("")
+        add_company_btn = st.button("Add Company")
+
+    if add_company_btn:
+        if new_company_name and new_ticker:
+            response = requests.post(
+                f"{API_URL_BASE}companies/",
+                params={
+                    "company_name": new_company_name,
+                    "ticker_symbol": new_ticker.upper()
+                }
+            )
+            if response.status_code == 200:
+                st.success(f"{new_company_name} ({new_ticker.upper()}) added!")
+                st.rerun()
+            else:
+                st.error(f"Failed to add company: {response.text}")
+        else:
+            st.warning("Please fill in both fields.")
+
+    st.markdown("---")
+
+    # ✅ Add to Watchlist Section
     st.subheader("Add to Watchlist")
     companies_data = fetch_companies()
 
-# Extract company nmes and ticker symbols for the autocomplete feature
-    # Extract company names and ticker symbols for the autocomplete feature
-    company_names = [company['company_name'] for company in companies_data]
-    ticker_symbols = [company['ticker_symbol'] for company in companies_data]
-    company_ticker_mapping = {company['company_name']: company['ticker_symbol'] for company in companies_data}
+    if not companies_data:
+        st.warning("No companies yet. Please add a company above first.")
+    else:
+        company_ticker_mapping = {company['company_name']: company['ticker_symbol'] for company in companies_data}
 
-    col1, col2 = st.columns([2, 1])
+        col1, col2 = st.columns([2, 1])
+        with col1:
+            company_name = st.selectbox("Company", options=company_ticker_mapping.keys(), key="watchlist_company")
+        with col2:
+            ticker_symbol = st.selectbox("Ticker Symbol", options=company_ticker_mapping[company_name], key="watchlist_ticker")
+
+        rsi_threshold = st.number_input("RSI Threshold", min_value=0, max_value=100)
+
+
+        if st.button("Add to Watchlist"):
+            user_id = get_user_id(st.session_state['user_email'])['id']
+            payload = {
+                "user_id": user_id,
+                "company_name": company_name,
+                "ticker_symbol": ticker_symbol,
+                "rsi_threshold": rsi_threshold
+            }
+            response = requests.post(
+                f"{API_URL_BASE}users/watchlist/",
+                headers={'Content-Type': 'application/json'},
+                data=json.dumps(payload)
+            )
+            if response.status_code == 200:
+                st.success(f"{company_name}, RSI {rsi_threshold} added to watchlist!")
+                st.rerun()
+            elif response.status_code == 400:
+                st.error(response.json().get('detail'))
+            else:
+                st.error("Error adding to watchlist.")
+
+    col1, col2 = st.columns([1, 5])
     with col1:
-        company_name = st.selectbox("Company", options=company_ticker_mapping.keys(), key=1)
-    with col2:
-        ticker_symbol = st.selectbox("Ticker Symbol", options=company_ticker_mapping[company_name], key=2)
+        if st.button("Refresh PEGY"):
+            user_id = get_user_id(st.session_state['user_email'])['id']
+            requests.post(f"{API_URL_BASE}users/watchlist/{user_id}/refresh-pegy")
+            st.rerun()
 
-    rsi_threshold = st.number_input("RSI Threshold", min_value=0, max_value=100)
-
-    submit_button = st.button(label='Add')
-
-    if submit_button:
-        user_id = get_user_id(st.session_state['user_email'])['id']
-        payload = {
-            "user_id": user_id,
-            "company_name": company_name,
-            "ticker_symbol": ticker_symbol,
-            "rsi_threshold": rsi_threshold
-        }
-
-        headers = {
-            'Content-Type': 'application/json'
-        }
-
-        response = requests.post(f"{API_URL_BASE}users/watchlist/", headers=headers, data=json.dumps(payload))
-
-        if response.status_code == 200:
-            st.success(f"Company {company_name}, RSI {rsi_threshold} added to alerts.")
-        elif response.status_code == 400:
-            st.error(response.json().get('detail'))
-        else:
-            st.error("Error adding to alerts.")
-
+    # Then in display_alerts, add pegy_ratio to col_list:
+    display_alerts("pending alerts", False, watchlist_data, 
+        ['Serial No.','company_name', 'ticker_symbol', 'rsi_threshold', 'pegy_ratio', 'added_datetime'])
+    display_alerts("triggered alerts", True, watchlist_data, 
+    ['Serial No.','company_name', 'ticker_symbol', 'rsi_threshold', 'pegy_ratio', 'triggered_datetime'])
 
 def main():
     # Create a simple Streamlit app with authentication,

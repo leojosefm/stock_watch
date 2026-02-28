@@ -26,6 +26,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 # Import your Base model for the target metadata
 from app.database import Base  # Adjust this import based on your project structure
+from app import models
 
 target_metadata = Base.metadata
 

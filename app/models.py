@@ -29,6 +29,7 @@ class Watchlist(Base):
     added_datetime  =  Column(DateTime, default=func.now())
     triggered_datetime = Column(DateTime, default=datetime(9999, 12, 31))
     rsi_triggered = Column(Numeric)
+    pegy_ratio = Column(Numeric, nullable=True) 
 
     __table_args__ = (
         UniqueConstraint('user_id', 'ticker_symbol', 'rsi_threshold', 'triggered', name='_user_ticker_rsi_trigger_uc'),
@@ -47,4 +48,5 @@ class Pricehistory(Base):
     volume = Column(Integer)
     RSI = Column(Numeric)
     ticker = Column(String)
+    pegy_ratio = Column(Numeric, nullable=True) 
 
