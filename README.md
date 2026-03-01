@@ -61,3 +61,26 @@ stock_watch/
 ```docker exec -it fastapi_app alembic revision --autogenerate -m "<comment>"
 docker exec -it fastapi_app alembic upgrade head
 ```
+
+## **MWAA**
+Setup copied from https://github.com/aws/aws-mwaa-local-runner. This is schedule RSI calculations of the stocks under scope on daily or weekly basis
+Steps to get container running
+1. ./mwaa-local-env build-image
+2. ./mwaa-local-env start
+
+3. If running on windows terminal -- remove windows carriage return characters sed -i -e 's/\r$//' docker/script/bootstrap.sh
+
+-- You need to connect - Postgres container to MWAA network 
+```
+docker network ls
+docker network connect <mwaa_network_name> <postgres_container_name>
+```
+
+### Dags
+1. load_companies - Reads wikipage , extracts S&P500 and loads to company table in our Postgres database. It uses a "check before insert" pattern to avoid duplicates. Runs daily, though in practice the S&P 500 list changes rarely
+
+2. calculate rsi - It first reads all ticker symbols from the company table, then for each one it downloads the last month of daily price data via yfinance and calculates the RSI (Relative Strength Index) using the standard 14-period rolling average approach. The results — including open, high, low, close, volume, and the calculated RSI value — are written into a price_history table. It deletes existing records for each ticker before reloading, so it's a full refresh per stock each day
+
+3. update watchlist - This is the alerting DAG. It queries a watchlist table where users have set RSI alert thresholds for specific stocks. The SQL finds the earliest date (after the watchlist entry was created) where the stock's RSI dropped to or below the user's threshold, and only for alerts not yet triggered. It then updates those watchlist rows to mark them as triggered, recording the RSI value and date when the threshold was crossed.
+
+ The entries for watchlist table are posted from the Fast API app through Streamlit front end

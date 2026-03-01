@@ -2,6 +2,13 @@ from pydantic import BaseModel
 from datetime import datetime,date
 from typing import Optional
 
+
+# Base - shared fields
+# Create - incoming requests
+# model_name as it is - Outgoing response, ORM Mode - allows Pydantic to read the response - Validates type is correct before it goes
+## out of the API
+
+
 class UserBase(BaseModel):
     email: str
 
@@ -58,6 +65,7 @@ class PricehistoryBase(BaseModel):
     adj_close: float
     volume: int
     ticker: str
+    pegy_ratio: float
 
 
 class PricehistoryBase(PricehistoryBase):
