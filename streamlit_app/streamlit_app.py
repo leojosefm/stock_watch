@@ -12,6 +12,7 @@ import logging
 import pandas as pd
 from dotenv import load_dotenv
 import os
+import time
 # import yfinance as yf
 
 
@@ -280,7 +281,8 @@ def show_main_page():
             )
             if response.status_code == 200:
                 st.success(f"{new_company_name} ({new_ticker.upper()}) added!")
-                st.rerun()
+                time.sleep(2) # Let the success message render before refresh
+                st.rerun()  # To have the new company appear in the dropdown immediately
             else:
                 st.error(f"Failed to add company: {response.text}")
         else:
