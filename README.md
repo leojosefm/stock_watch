@@ -92,3 +92,8 @@ select *  from public.company ;
  ## Architecture
 AI Generated
 ![Architecture](docs/architecture.png)  
+
+#### URls when container are uprunning
+Airflow: http://localhost:8080/home
+FastAPi: http://localhost:8000/docs
+streamlit: http://localhost:8501/
