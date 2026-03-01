@@ -122,6 +122,16 @@ def fetch_companies():
         st.error(f"Error connecting to API: {e}")
         return []       
 
+def fetch_price_history(ticker: str):
+    try:
+        response = requests.get(f"{API_URL_BASE}companies/history/{ticker}", timeout=5)
+        if response.status_code == 200:
+            return response.json()
+        return None
+    except Exception as e:
+        st.error(f"Error fetching history: {e}")
+        return None
+
 # Function to fetch latest PEGY ratio by ticker
 def fetch_pegy_by_ticker(ticker: str):
     try:
@@ -298,7 +308,7 @@ def show_main_page():
 
         pegy_data = fetch_pegy_by_ticker(ticker_symbol)
         if pegy_data:
-            col1, col2 = st.columns(2)
+            col1, col2, col3 = st.columns(3)
             with col1:
                 rsi_value = pegy_data.get('RSI')
                 if rsi_value is not None:
@@ -343,6 +353,16 @@ def show_main_page():
                     <span style='color:#ef4444'>● Above 2.0</span> — overvalued, be cautious
                     </small>
                 """, unsafe_allow_html=True)
+            with col3:
+                st.caption(f"Last 1 Month — {ticker_symbol}")
+                history = fetch_price_history(ticker_symbol)
+                if history:
+                    df_hist = pd.DataFrame(history)
+                    df_hist['date'] = pd.to_datetime(df_hist['date'])
+                    df_hist = df_hist.set_index('date')
+                    st.line_chart(df_hist['close'], use_container_width=True, height=150)
+                else:
+                    st.markdown("No data available")
         else:
             st.info("No price data available for this ticker yet.")
 

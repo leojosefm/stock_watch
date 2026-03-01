@@ -27,3 +27,12 @@ def get_pegy_by_ticker(ticker: str, db: Session = Depends(get_db)):
     if not result:
         raise HTTPException(status_code=404, detail=f"No data found for ticker {ticker}")
     return result
+
+
+@router.get("/history/{ticker}")
+def get_price_history(ticker: str, db: Session = Depends(get_db)):
+    result = db.query(models.Pricehistory)\
+        .filter(models.Pricehistory.ticker == ticker)\
+        .order_by(models.Pricehistory.date.asc())\
+        .all()
+    return [{"date": r.date, "close": float(r.close)} for r in result]
