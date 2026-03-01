@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stock Monitor Architecture</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Syne:wght@400;700;800&display=swap');
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            background: #080c10;
+            color: #e2e8f0;
+            font-family: 'Syne', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 40px 20px;
+        }
+
+        h1 {
+            font-size: 13px;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            color: #e2b96f;
+            margin-bottom: 6px;
+        }
+
+        .subtitle {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            color: #334155;
+            letter-spacing: 2px;
+            margin-bottom: 50px;
+        }
+
+        .diagram {
+            width: 100%;
+            max-width: 960px;
+            position: relative;
+        }
+
+        /* ROW LAYOUTS */
+        .row {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 0;
+            margin-bottom: 0;
+            position: relative;
+        }
+
+        /* COMPONENT CARDS */
+        .component {
+            border-radius: 10px;
+            padding: 20px 24px;
+            position: relative;
+            min-width: 180px;
+            text-align: center;
+            z-index: 2;
+        }
+
+        .component-icon {
+            font-size: 28px;
+            margin-bottom: 8px;
+        }
+
+        .component-name {
+            font-size: 16px;
+            font-weight: 800;
+            letter-spacing: 1px;
+            margin-bottom: 4px;
+        }
+
+        .component-desc {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 10px;
+            color: #64748b;
+            letter-spacing: 0.5px;
+            line-height: 1.5;
+        }
+
+        /* COLORS PER COMPONENT */
+        .streamlit {
+            background: linear-gradient(135deg, #0f2027 0%, #1a3040 100%);
+            border: 1px solid #ff4b4b44;
+            box-shadow: 0 0 30px #ff4b4b22;
+        }
+        .streamlit .component-name { color: #ff4b4b; }
+
+        .fastapi {
+            background: linear-gradient(135deg, #0a1f14 0%, #0d2b1a 100%);
+            border: 1px solid #00d46444;
+            box-shadow: 0 0 30px #00d46422;
+        }
+        .fastapi .component-name { color: #00d464; }
+
+        .postgres {
+            background: linear-gradient(135deg, #0d1b2e 0%, #112240 100%);
+            border: 1px solid #336791aa;
+            box-shadow: 0 0 30px #33679133;
+        }
+        .postgres .component-name { color: #4a9fd5; }
+
+        .airflow {
+            background: linear-gradient(135deg, #1a0f2e 0%, #2a1540 100%);
+            border: 1px solid #017cee44;
+            box-shadow: 0 0 30px #017cee22;
+        }
+        .airflow .component-name { color: #017cee; }
+
+        /* SUB ITEMS */
+        .sub-items {
+            margin-top: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            text-align: left;
+        }
+
+        .sub-item {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 9px;
+            padding: 3px 8px;
+            border-radius: 4px;
+            letter-spacing: 0.5px;
+        }
+
+        .streamlit .sub-item { background: #ff4b4b11; color: #ff4b4b99; border-left: 2px solid #ff4b4b44; }
+        .fastapi .sub-item { background: #00d46411; color: #00d46499; border-left: 2px solid #00d46444; }
+        .postgres .sub-item { background: #336791111; color: #4a9fd599; border-left: 2px solid #33679144; }
+        .airflow .sub-item { background: #017cee11; color: #017cee99; border-left: 2px solid #017cee44; }
+
+        /* ARROWS */
+        .arrow-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            z-index: 1;
+            padding: 0 8px;
+        }
+
+        .arrow-h {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .arrow-line {
+            height: 1px;
+            width: 60px;
+            background: linear-gradient(90deg, #334155, #e2b96f, #334155);
+            position: relative;
+        }
+
+        .arrow-label {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 8px;
+            color: #e2b96f88;
+            letter-spacing: 1px;
+            white-space: nowrap;
+        }
+
+        .arrow-right::after {
+            content: '▶';
+            position: absolute;
+            right: -6px;
+            top: -5px;
+            font-size: 8px;
+            color: #e2b96f;
+        }
+
+        .arrow-left::before {
+            content: '◀';
+            position: absolute;
+            left: -6px;
+            top: -5px;
+            font-size: 8px;
+            color: #e2b96f;
+        }
+
+        .arrow-both::after {
+            content: '▶';
+            position: absolute;
+            right: -6px;
+            top: -5px;
+            font-size: 8px;
+            color: #e2b96f;
+        }
+        .arrow-both::before {
+            content: '◀';
+            position: absolute;
+            left: -6px;
+            top: -5px;
+            font-size: 8px;
+            color: #e2b96f;
+        }
+
+        /* VERTICAL ARROW */
+        .arrow-v-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 60px;
+            position: relative;
+        }
+
+        .arrow-v {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .arrow-v-line {
+            width: 1px;
+            height: 40px;
+            background: linear-gradient(180deg, #334155, #e2b96f, #334155);
+            position: relative;
+        }
+
+        .arrow-v-line.down::after {
+            content: '▼';
+            position: absolute;
+            bottom: -8px;
+            left: -4px;
+            font-size: 8px;
+            color: #e2b96f;
+        }
+
+        .arrow-v-line.up::before {
+            content: '▲';
+            position: absolute;
+            top: -8px;
+            left: -4px;
+            font-size: 8px;
+            color: #e2b96f;
+        }
+
+        .arrow-v-line.both::after {
+            content: '▼';
+            position: absolute;
+            bottom: -8px;
+            left: -4px;
+            font-size: 8px;
+            color: #e2b96f;
+        }
+        .arrow-v-line.both::before {
+            content: '▲';
+            position: absolute;
+            top: -8px;
+            left: -4px;
+            font-size: 8px;
+            color: #e2b96f;
+        }
+
+        .arrow-v-label {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 8px;
+            color: #e2b96f88;
+            letter-spacing: 1px;
+            writing-mode: horizontal-tb;
+            white-space: nowrap;
+        }
+
+        /* USER NODE */
+        .user-node {
+            text-align: center;
+            padding: 16px 24px;
+            border-radius: 50px;
+            background: #0f172a;
+            border: 1px dashed #334155;
+            margin-bottom: 0;
+        }
+
+        .user-node .component-name {
+            color: #94a3b8;
+            font-size: 13px;
+        }
+
+        /* BOTTOM ROW - Airflow DAGs */
+        .dags-row {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+            justify-content: center;
+        }
+
+        .dag-pill {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 9px;
+            padding: 4px 10px;
+            border-radius: 20px;
+            background: #017cee11;
+            border: 1px solid #017cee33;
+            color: #017cee99;
+            letter-spacing: 0.5px;
+            white-space: nowrap;
+        }
+
+        /* MAIN LAYOUT */
+        .main-row {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0;
+            width: 100%;
+        }
+
+        .center-col {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .top-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 0;
+        }
+
+        .bottom-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 0;
+        }
+
+        /* LEGEND */
+        .legend {
+            margin-top: 50px;
+            display: flex;
+            gap: 24px;
+            align-items: center;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 9px;
+            color: #334155;
+            letter-spacing: 1px;
+        }
+
+        .legend-line {
+            width: 20px;
+            height: 1px;
+            background: #e2b96f;
+        }
+
+        .legend-dashed {
+            width: 20px;
+            height: 1px;
+            border-top: 1px dashed #334155;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Stock Monitor</h1>
+    <div class="subtitle">// system architecture</div>
+
+    <div class="diagram">
+
+        <!-- USER -->
+        <div style="display:flex; justify-content:center; margin-bottom:0;">
+            <div class="user-node">
+                <div class="component-icon">👤</div>
+                <div class="component-name">User / Browser</div>
+            </div>
+        </div>
+
+        <!-- User to Streamlit arrow -->
+        <div class="arrow-v-container" style="justify-content:center;">
+            <div class="arrow-v">
+                <div class="arrow-v-line both"></div>
+                <div class="arrow-v-label">HTTP :8501</div>
+            </div>
+        </div>
+
+        <!-- MAIN ROW: Streamlit | arrow | FastAPI | arrow | Postgres -->
+        <div class="main-row">
+
+            <!-- Streamlit -->
+            <div class="component streamlit" style="min-width:200px;">
+                <div class="component-icon">📊</div>
+                <div class="component-name">Streamlit</div>
+                <div class="component-desc">Frontend UI</div>
+                <div class="sub-items">
+                    <div class="sub-item">Google OAuth Login</div>
+                    <div class="sub-item">Watchlist Dashboard</div>
+                    <div class="sub-item">RSI + PEGY Display</div>
+                    <div class="sub-item">Add Company / Alert</div>
+                </div>
+            </div>
+
+            <!-- Streamlit → FastAPI -->
+            <div class="arrow-container">
+                <div class="arrow-h">
+                    <div class="arrow-line arrow-both"></div>
+                    <div class="arrow-label">REST API</div>
+                    <div class="arrow-label">:8000</div>
+                </div>
+            </div>
+
+            <!-- FastAPI -->
+            <div class="component fastapi" style="min-width:200px;">
+                <div class="component-icon">⚡</div>
+                <div class="component-name">FastAPI</div>
+                <div class="component-desc">Backend API</div>
+                <div class="sub-items">
+                    <div class="sub-item">/users</div>
+                    <div class="sub-item">/companies</div>
+                    <div class="sub-item">/watchlist</div>
+                    <div class="sub-item">/companies/pegy/{ticker}</div>
+                </div>
+            </div>
+
+            <!-- FastAPI → Postgres -->
+            <div class="arrow-container">
+                <div class="arrow-h">
+                    <div class="arrow-line arrow-both"></div>
+                    <div class="arrow-label">SQLAlchemy</div>
+                    <div class="arrow-label">:5432</div>
+                </div>
+            </div>
+
+            <!-- Postgres -->
+            <div class="component postgres" style="min-width:200px;">
+                <div class="component-icon">🐘</div>
+                <div class="component-name">PostgreSQL</div>
+                <div class="component-desc">Database</div>
+                <div class="sub-items">
+                    <div class="sub-item">user</div>
+                    <div class="sub-item">company</div>
+                    <div class="sub-item">watchlist</div>
+                    <div class="sub-item">price_history</div>
+                    <div class="sub-item">pegy_ratio_latest_v 👁</div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Airflow arrow down from Postgres -->
+        <div style="display:flex; justify-content:center; margin-left:340px;">
+            <div class="arrow-v-container">
+                <div class="arrow-v">
+                    <div class="arrow-v-line both"></div>
+                    <div class="arrow-v-label">writes data</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Airflow -->
+        <div style="display:flex; justify-content:flex-end; padding-right:0;">
+            <div class="component airflow" style="min-width:200px;">
+                <div class="component-icon">🌀</div>
+                <div class="component-name">Airflow</div>
+                <div class="component-desc">Scheduler / ETL</div>
+                <div class="dags-row">
+                    <div class="dag-pill">load_companies</div>
+                    <div class="dag-pill">calculate_rsi</div>
+                    <div class="dag-pill">update_watchlist</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- yfinance note -->
+        <div style="display:flex; justify-content:flex-end; margin-top:10px; padding-right:20px;">
+            <div style="font-family:'JetBrains Mono',monospace; font-size:9px; color:#334155; letter-spacing:1px;">
+                ↑ pulls from yfinance (S&P 500 price + RSI + PEGY)
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Legend -->
+    <div class="legend">
+        <div class="legend-item">
+            <div class="legend-line"></div>
+            bidirectional data flow
+        </div>
+        <div class="legend-item">
+            <div class="legend-dashed"></div>
+            external / browser
+        </div>
+        <div class="legend-item">
+            👁 = view (read-only)
+        </div>
+    </div>
+
+</body>
+</html>

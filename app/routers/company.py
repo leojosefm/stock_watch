@@ -20,3 +20,10 @@ def get_companies(db: Session = Depends(get_db)):
 @router.post("/")
 def create_company(company_name: str, ticker_symbol: str, db: Session = Depends(get_db)):
     return crud.create_company(db, company_name, ticker_symbol)  # 👈 cleaner
+
+@router.get("/pegy/{ticker}")
+def get_pegy_by_ticker(ticker: str, db: Session = Depends(get_db)):
+    result = crud.get_latest_pegy_by_ticker(db, ticker)
+    if not result:
+        raise HTTPException(status_code=404, detail=f"No data found for ticker {ticker}")
+    return result

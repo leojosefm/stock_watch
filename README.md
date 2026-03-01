@@ -88,3 +88,7 @@ select *  from public.company ;
 3. update watchlist - This is the alerting DAG. It queries a watchlist table where users have set RSI alert thresholds for specific stocks. The SQL finds the earliest date (after the watchlist entry was created) where the stock's RSI dropped to or below the user's threshold, and only for alerts not yet triggered. It then updates those watchlist rows to mark them as triggered, recording the RSI value and date when the threshold was crossed.
 
  The entries for watchlist table are posted from the Fast API app through Streamlit front end
+
+ ## Architecture
+AI Generated
+![Architecture](docs/architecture.png)  

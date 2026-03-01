@@ -60,7 +60,7 @@ def display_alerts(type,triggered_flag,watchlist_data,col_list):
         return
     
 
-    alerts = watchlist_data
+    alerts = watchlist_data[watchlist_data['triggered'] == triggered_flag]
     if not alerts.empty:
         # Create dataframe for pending alerts
         alerts = alerts.reset_index(drop=True)
@@ -122,6 +122,16 @@ def fetch_companies():
         st.error(f"Error connecting to API: {e}")
         return []       
 
+# Function to fetch latest PEGY ratio by ticker
+def fetch_pegy_by_ticker(ticker: str):
+    try:
+        response = requests.get(f"{API_URL_BASE}companies/pegy/{ticker}", timeout=5)
+        if response.status_code == 200:
+            return response.json()
+        return None
+    except Exception as e:
+        st.error(f"Error fetching PEGY: {e}")
+        return None
 
 # Function to generate a random nonce
 def generate_nonce(length=16):
@@ -235,12 +245,6 @@ def show_main_page():
     elif isinstance(watchlist_data, list):
         watchlist_data = pd.DataFrame(watchlist_data)
 
-    col1, col2 = st.columns(2)
-    with col1:
-        display_alerts("pending alerts", False, watchlist_data, ['Serial No.','company_name', 'ticker_symbol', 'rsi_threshold','added_datetime'])
-    with col2:
-        display_alerts("triggered alerts", True, watchlist_data, ['Serial No.','company_name', 'ticker_symbol', 'rsi_threshold','triggered_datetime'])
-
     st.markdown("---")
 
     # ✅ Add New Company Section
@@ -290,6 +294,57 @@ def show_main_page():
             ticker_symbol = st.selectbox("Ticker Symbol", options=company_ticker_mapping[company_name], key="watchlist_ticker")
 
         rsi_threshold = st.number_input("RSI Threshold", min_value=0, max_value=100)
+        
+
+        pegy_data = fetch_pegy_by_ticker(ticker_symbol)
+        if pegy_data:
+            col1, col2 = st.columns(2)
+            with col1:
+                rsi_value = pegy_data.get('RSI')
+                if rsi_value is not None:
+                    if rsi_value < 30:
+                        rsi_color = '#22c55e'
+                    elif rsi_value > 70:
+                        rsi_color = '#ef4444'
+                    else:
+                        rsi_color = '#94a3b8'
+                    st.caption("Latest RSI")
+                    st.markdown(f"<p style='font-size:28px; font-weight:700; color:{rsi_color}; margin:0'>{round(rsi_value, 2)}</p>", unsafe_allow_html=True)
+                else:
+                    st.caption("Latest RSI")
+                    st.markdown("N/A")
+                st.markdown("""
+                    <small>
+                    <span style='color:#22c55e'>● Below 30</span> — oversold, potential buy<br>
+                    <span style='color:#94a3b8'>● 30 to 50</span> — recovering, worth watching<br>
+                    <span style='color:#ef4444'>● Above 70</span> — overbought, avoid buying
+                    </small>
+                """, unsafe_allow_html=True)
+            with col2:
+                pegy_value = pegy_data.get('pegy_ratio')
+                if pegy_value is not None:
+                    if pegy_value < 0:
+                        pegy_color = '#ef4444'
+                    elif pegy_value < 1.0:
+                        pegy_color = '#22c55e'
+                    elif pegy_value > 2.0:
+                        pegy_color = '#ef4444'
+                    else:
+                        pegy_color = '#94a3b8'
+                    st.caption("Latest PEGY Ratio")
+                    st.markdown(f"<p style='font-size:28px; font-weight:700; color:{pegy_color}; margin:0'>{round(pegy_value, 2)}</p>", unsafe_allow_html=True)
+                else:
+                    st.caption("Latest PEGY Ratio")
+                    st.markdown("N/A")
+                st.markdown("""
+                    <small>
+                    <span style='color:#22c55e'>● Below 1.0</span> — undervalued, strong buy<br>
+                    <span style='color:#94a3b8'>● 1.0 to 2.0</span> — fairly valued, acceptable<br>
+                    <span style='color:#ef4444'>● Above 2.0</span> — overvalued, be cautious
+                    </small>
+                """, unsafe_allow_html=True)
+        else:
+            st.info("No price data available for this ticker yet.")
 
 
         if st.button("Add to Watchlist"):
@@ -312,13 +367,6 @@ def show_main_page():
                 st.error(response.json().get('detail'))
             else:
                 st.error("Error adding to watchlist.")
-
-    col1, col2 = st.columns([1, 5])
-    with col1:
-        if st.button("Refresh PEGY"):
-            user_id = get_user_id(st.session_state['user_email'])['id']
-            requests.post(f"{API_URL_BASE}users/watchlist/{user_id}/refresh-pegy")
-            st.rerun()
 
     # Then in display_alerts, add pegy_ratio to col_list:
     display_alerts("pending alerts", False, watchlist_data, 

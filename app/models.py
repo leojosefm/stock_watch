@@ -51,3 +51,16 @@ class Pricehistory(Base):
     ticker = Column(String)
     pegy_ratio = Column(Numeric, nullable=True) 
 
+class PegyRatioLatestView(Base):
+    __tablename__ = 'pegy_ratio_latest_v'
+    __table_args__ = {'info': dict(is_view=True)}
+
+    ticker = Column(String, primary_key=True)
+    date = Column(Date)
+    open = Column(Numeric)
+    high = Column(Numeric)
+    low = Column(Numeric)
+    close = Column(Numeric)
+    volume = Column(Integer)
+    RSI = Column(Numeric)
+    pegy_ratio = Column(Numeric)

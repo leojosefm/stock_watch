@@ -77,3 +77,13 @@ class Pricehistory(PricehistoryBase):
     class Config:
         orm_mode = True
 
+class PegyRatioLatestView(BaseModel):  ## only response no need to expose all the price columns since that's all Streamlit needs to display
+    ticker: str
+    date: date
+    RSI: Optional[float] = None
+    pegy_ratio: Optional[float] = None
+
+    class Config:
+        orm_mode = True
+
+        

@@ -78,3 +78,8 @@ def create_company(db: Session, company_name: str, ticker_symbol: str):
     db.commit()
     db.refresh(company)
     return company
+
+def get_latest_pegy_by_ticker(db: Session, ticker: str):
+    return db.query(models.PegyRatioLatestView).filter(
+        models.PegyRatioLatestView.ticker == ticker
+    ).first()
