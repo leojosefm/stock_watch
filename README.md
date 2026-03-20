@@ -89,9 +89,6 @@ select *  from public.company ;
 
  The entries for watchlist table are posted from the Fast API app through Streamlit front end
 
- ## Architecture
-AI Generated
-![Architecture](docs/architecture.png)  
 
 #### URls when container are uprunning
 Airflow: http://localhost:8080/home
