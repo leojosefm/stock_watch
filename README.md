@@ -7,7 +7,6 @@ This project is a simple  application that uses FastAPI for building APIs and Po
 - **PostgreSQL** for database management.
 - **Docker** for containerized deployment.
 - **Alembic** for handling database migrations.
-- Automated migrations when the FastAPI container starts.
 
 ## **Requirements**
 To run this project, you will need:
