@@ -29,7 +29,6 @@ dag = DAG(
 )
 
 
-
 def get_pegy_ratio(ticker_symbol: str):
     try:
         stock = yf.Ticker(ticker_symbol)
@@ -103,12 +102,13 @@ def read_company(**kwargs):
 
 def load_historical_data(**kwargs):
     conn = psycopg2.connect(
-    host=Variable.get('stock_db_host'),
-    database=Variable.get('stock_db_name'),
-    user=Variable.get('stock_db_user'),
-    password=Variable.get('stock_db_password'),
-    port="5432"
+        host=Variable.get('stock_db_host'),
+        database=Variable.get('stock_db_name'),
+        user=Variable.get('stock_db_user'),
+        password=Variable.get('stock_db_password'),
+        port="5432"
     )
+
     cur = conn.cursor()
     engine = create_engine(f"postgresql://{Variable.get('stock_db_user')}:{Variable.get('stock_db_password')}@{Variable.get('stock_db_host')}:5432/{Variable.get('stock_db_name')}")
     company_list = kwargs['ti'].xcom_pull(key='company_list', task_ids='read_company')

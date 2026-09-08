@@ -11,7 +11,7 @@ services:
         max-size: 10m
         max-file: "3"
     volumes:
-      - "${PWD}/db-data:/var/lib/postgresql/data"
+      - postgres_data:/var/lib/postgresql/data
 
   local-runner:
     image: amazon/mwaa-local:2_10_3
@@ -40,3 +40,6 @@ services:
       retries: 3
     env_file:
       - ./config/.env.localrunner
+
+volumes:
+  postgres_data:

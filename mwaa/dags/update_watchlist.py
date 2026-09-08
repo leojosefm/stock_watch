@@ -10,6 +10,7 @@ from airflow.operators.email import EmailOperator
 
 
 default_args = {
+    
     'owner': 'airflow',
     'depends_on_past': False,
     'start_date': datetime(2024, 10, 11),
@@ -20,13 +21,7 @@ default_args = {
      'catchup':False
 }
 
-conn = psycopg2.connect(
-        host=Variable.get('stock_db_host'),
-        database=Variable.get('stock_db_name'),
-        user=Variable.get('stock_db_user'),
-        password=Variable.get('stock_db_password'),
-        port="5432"
-    )
+
 
 dag = DAG(
     'update_watchlist',
@@ -36,6 +31,13 @@ dag = DAG(
 )
 
 def find_rsi_threshold_reached(**kwargs):
+    conn = psycopg2.connect(
+        host=Variable.get('stock_db_host'),
+        database=Variable.get('stock_db_name'),
+        user=Variable.get('stock_db_user'),
+        password=Variable.get('stock_db_password'),
+        port="5432"
+    )
     sql_query = """
             select 
             id as user_id,ticker_symbol,rsi_threshold,"RSI",date
@@ -63,6 +65,13 @@ def find_rsi_threshold_reached(**kwargs):
 
         
 def update_watchlist(**kwargs):
+    conn = psycopg2.connect(
+        host=Variable.get('stock_db_host'),
+        database=Variable.get('stock_db_name'),
+        user=Variable.get('stock_db_user'),
+        password=Variable.get('stock_db_password'),
+        port="5432"
+    )
     tmp_watchlist = kwargs['ti'].xcom_pull(key='rsi_threshold_reached', task_ids='find_rsi')
     if not tmp_watchlist:
         logging.info("No alerts")

@@ -20,6 +20,13 @@ default_args = {
      'catchup':False
 }
 
+EXTRA_COMPANIES = [
+    ["GSL", "Global Ship Lease"],
+    ["BIRG", "Bank of Ireland Group"],
+    # add more as [ticker, name]
+]
+
+
 dag = DAG(
     'load_companies',
     default_args=default_args,
@@ -45,12 +52,21 @@ def get_sp500_companies():
     
     # Extract the relevant columns: 'Symbol' and 'Security'
     sp500_companies = sp500_table[['Symbol', 'Security']].values.tolist()
-    logging.info(sp500_companies)
+    #logging.info(sp500_companies)
+    
+    existing_tickers = {row[0] for row in sp500_companies}
+    for ticker, name in EXTRA_COMPANIES:
+        if ticker not in existing_tickers:
+            sp500_companies.append([ticker, name])
+
     return sp500_companies
 
 
 # Function to insert companies into the database
 def insert_sp500_companies():
+    print (Variable.get('stock_db_host'))
+
+
     conn = psycopg2.connect(
         host=Variable.get('stock_db_host'),
         database=Variable.get('stock_db_name'),

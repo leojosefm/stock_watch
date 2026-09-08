@@ -38,6 +38,21 @@ services:
     networks:
       - my_network
 
+  mcp-server:
+    build:
+      context: ./mcp_server
+      dockerfile: Dockerfile
+    container_name: mcp_server
+    environment:
+      API_BASE_URL: http://fastapi:8000
+    ports:
+      - "8100:8100"
+    depends_on:
+      fastapi:
+        condition: service_started
+    networks:
+      - my_network
+
   streamlit:
     build:
       context: .

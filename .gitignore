@@ -17,3 +17,4 @@ postgres_data/
 # Python virtual environment
 .env
 
+mcp_server/
