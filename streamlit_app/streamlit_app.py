@@ -24,9 +24,6 @@ load_dotenv()
 
 # Configure Google OAuth 2.0
 CLIENT_ID = os.getenv('CLIENT_ID')
-CLIENT_SECRET = os.getenv('CLIENT_SECRET')
-
-
     
 # Function to call FastAPI to create a user
 def create_user(email: str):
@@ -157,10 +154,19 @@ def verify_google_sign_in(token):
 # Create a function to verify the token received from Google
 def verify_token(token):
     try:
-        idinfo = id_token.verify_oauth2_token(token, google_requests.Request(), CLIENT_ID)
-        print (idinfo)
+        idinfo = id_token.verify_oauth2_token(
+            token,
+            google_requests.Request(),
+            CLIENT_ID,
+            clock_skew_in_seconds=10   # Allow 10 seconds of clock skew
+        )
+
+        st.write("Verified User:", idinfo)   # <-- ADD THIS
         return idinfo
-    except ValueError:
+
+    except Exception as e:
+        st.exception(e)                      # <-- ADD THIS
+        print(e)
         return None
     
 # def get_pegy_ratio(ticker_symbol: str):
@@ -194,19 +200,25 @@ def show_login_page():
     st.markdown("#### Login using Gmail")
     st.markdown(f'<a href="https://accounts.google.com/o/oauth2/v2/auth?client_id={CLIENT_ID}&redirect_uri=http://localhost:8501/&response_type=id_token&scope=email profile&nonce={st.session_state.nonce}" target="_self">Sign in with Gmail</a>', unsafe_allow_html=True)
 
+
+
     current_value = get_fragment()
+    st.write("Fragment:", current_value)   # <-- ADD THIS
     if current_value:
             # Remove the leading '#' character
             parsed_string = current_value.lstrip('#')
             # Parse the query string
+            st.write("Parsed String:", parsed_string)
             parsed_query = parse_qs(parsed_string)
-
+            st.write("Parsed Query:", parsed_query)
             # Extract the access token
             access_token = parsed_query.get('id_token', [None])[0]
-
+            st.write("Access Token Exists:", access_token is not None)
 
             if access_token:
                 user_info = verify_token(access_token)
+                st.write("User Info:", user_info)
+                st.write("CLIENT_ID:", CLIENT_ID)
 
                 if user_info:
                     st.session_state['logged_in'] = True
@@ -241,13 +253,10 @@ def show_main_page():
         unsafe_allow_html=True
     )
     
-    st.write(f'''
-<div class="top-right-button">
-<a target="_self" href="http://localhost:8501">
-    <button>Log out</button>
-</a>
-</div>
-''', unsafe_allow_html=True)
+    if st.button("🚪 Log out"):
+        st.session_state["logged_in"] = False
+        st.session_state.pop("user_email", None)
+        st.rerun()
     
     watchlist_data = fetch_watchlist(get_user_id(st.session_state['user_email'])['id'])
 
