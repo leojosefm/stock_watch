@@ -45,6 +45,9 @@ services:
     container_name: mcp_server
     environment:
       API_BASE_URL: http://fastapi:8000
+      CLIENT_ID: ${CLIENT_ID}
+      ALLOWED_EMAILS: ${ALLOWED_EMAILS}
+      MCP_RESOURCE_URL: http://localhost:8100/mcp
     ports:
       - "8100:8100"
     depends_on:

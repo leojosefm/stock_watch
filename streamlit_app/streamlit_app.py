@@ -157,7 +157,8 @@ def verify_google_sign_in(token):
 # Create a function to verify the token received from Google
 def verify_token(token):
     try:
-        idinfo = id_token.verify_oauth2_token(token, google_requests.Request(), CLIENT_ID)
+        idinfo = id_token.verify_oauth2_token(token, google_requests.Request(), CLIENT_ID
+                                              ,clock_skew_in_seconds=10)
         print (idinfo)
         return idinfo
     except ValueError:
@@ -228,26 +229,24 @@ def show_main_page():
 
     st.markdown("---")
 
-    st.markdown(
-        """
-        <style>
-        .top-right-button {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-        }
-        </style>
-        """,
-        unsafe_allow_html=True
-    )
+    # st.markdown(
+    #     """
+    #     <style>
+    #     .top-right-button {
+    #         position: absolute;
+    #         top: 10px;
+    #         right: 10px;
+    #     }
+    #     </style>
+    #     """,
+    #     unsafe_allow_html=True
+    # )
     
-    st.write(f'''
-<div class="top-right-button">
-<a target="_self" href="http://localhost:8501">
+    st.markdown("""
+    <a href="/?logout=true">
     <button>Log out</button>
-</a>
-</div>
-''', unsafe_allow_html=True)
+    </a>
+    """, unsafe_allow_html=True)
     
     watchlist_data = fetch_watchlist(get_user_id(st.session_state['user_email'])['id'])
 
@@ -398,11 +397,18 @@ def show_main_page():
 
 def main():
     # Create a simple Streamlit app with authentication,
-# Initialize session state
+    # Initialize session state
     if 'logged_in' not in st.session_state:
         st.session_state['logged_in'] = False
     if 'nonce' not in st.session_state:
         st.session_state.nonce = generate_nonce()
+
+    query_params = st.query_params
+
+    if query_params.get("logout") == "true":
+        st.session_state.clear()
+        st.query_params.clear()
+        st.rerun()
 
     # Display the appropriate page based on login status
     if st.session_state['logged_in']:
