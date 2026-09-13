@@ -95,7 +95,8 @@ def read_company(**kwargs):
     company_id = cur.fetchone()[0]
     logging.info(f"max company id in price history is {company_id}")
     logging.info(f" executing SQL: SELECT ticker_symbol FROM company where id >{company_id}")  
-    cur.execute(f"SELECT ticker_symbol FROM company where id >{company_id}")
+    
+    cur.execute(f"SELECT ticker_symbol FROM company where id >{company_id if company_id else 0}")
     result = cur.fetchall()
     ticker_list = [item[0] for item in result]
     kwargs['ti'].xcom_push(key="company_list", value=ticker_list)

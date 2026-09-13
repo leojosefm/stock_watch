@@ -59,6 +59,7 @@ def find_rsi_threshold_reached(**kwargs):
             """
     cur = conn.cursor()
     cur.execute(sql_query)
+    
     tmp_watchlist = cur.fetchall()
     kwargs['ti'].xcom_push(key="rsi_threshold_reached", value=tmp_watchlist)
     cur.close()
@@ -72,11 +73,11 @@ def update_watchlist(**kwargs):
         password=Variable.get('stock_db_password'),
         port="5432"
     )
-    tmp_watchlist = kwargs['ti'].xcom_pull(key='rsi_threshold_reached', task_ids='find_rsi')
-    if not tmp_watchlist:
-        logging.info("No alerts")
-        return True
+
     cur = conn.cursor()
+    tmp_watchlist = kwargs['ti'].xcom_pull(key='rsi_threshold_reached', task_ids='find_rsi')
+
+    
     for i in range(0,len(tmp_watchlist)):
         upd_query = f"""
         update watchlist
@@ -87,6 +88,14 @@ def update_watchlist(**kwargs):
         """
         logging.info(upd_query)
         cur.execute(upd_query)
+
+    logging.info("Updating pegy ratio") 
+    cur.execute("""
+            update watchlist as w set pegy_ratio =s.pegy_ratio from 
+            pegy_ratio_latest_v as s 
+            where s.ticker = w.ticker_symbol
+    """)
+
     conn.commit()
     cur.close()
     conn.close()

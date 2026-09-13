@@ -49,7 +49,7 @@ services:
       ALLOWED_EMAILS: ${ALLOWED_EMAILS}
       MCP_RESOURCE_URL: http://localhost:8100/mcp
     ports:
-      - "8100:8100"
+      - "18100:8100"
     depends_on:
       fastapi:
         condition: service_started
