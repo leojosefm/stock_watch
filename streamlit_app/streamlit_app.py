@@ -10,10 +10,13 @@ import requests
 import json
 import logging
 import pandas as pd
+
 from dotenv import load_dotenv
 import os
 import time
+
 # import yfinance as yf
+
 
 
 # API URL for creating a user
